@@ -23,17 +23,30 @@ def load_keys(keys_: dict) -> None:
     for key in keys_.keys():
         value: str = keys_.get(key)
         keyboard.add_hotkey(key, key_write, args=(key, value))
-        print(" \n", key, "->", value)
+        print(" ", key, "->", value[:100] + "..." if len(value) > 100 else value)
 
 
-def refresh_keys(hotkey):
+def refresh_keys(hotkey: str):
     keyboard.remove_all_hotkeys()
-    keyboard.add_hotkey(hotkey, refresh_keys, args=(hotkey))
+    keyboard.add_hotkey(hotkey, refresh_keys, args=(hotkey,))
     load_keys(get_keys())
 
 
-with open("settings.json", "r") as settings_file:
-    settings: dict = json.load(settings_file)
+try:
+    with open("settings.json", "r") as settings_file:
+        settings: dict = json.load(settings_file)
+except FileNotFoundError:
+    with open("settings.json", "w+") as settings_file:
+        settings_file.write(json.dumps(
+            {
+                "Keyboard Input Delay": 0.008,
+                "Character Limit Break": 127,
+                "Text Chat Button": "t",
+                "Refresh Keys": "ctrl+`"
+            }
+        ))
+        settings: dict = json.load(settings_file)
+finally:
     KEY_IN_DELAY: float = settings.get("Keyboard Input Delay")
     CHAR_LIMIT: int = settings.get("Character Limit Break")
     TEXT_CHAT_BUTTON: str = settings.get("Text Chat Button")
